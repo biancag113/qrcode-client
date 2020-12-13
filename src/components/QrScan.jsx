@@ -6,7 +6,7 @@ class QrScan extends Component {
   constructor(props){
     super(props)
     this.state = {
-      delay: 10000,
+      delay: 10,
       result: 'No result',
     }
  

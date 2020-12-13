@@ -14,43 +14,41 @@ Amplify.configure(awsconfig);
 function App() {
 
   //state to hold qr codes
-  const [qrs, setQrs] = React.useState([])
+  const [qrcs, setQrcs] = React.useState([])
 
   //state to hold form data
   const [createForm, setCreateForm] = React.useState({
-    store: '',
-    code: ''
+    num: '',
+    discount: ''
   })
 
   //function to make api call to get the qr codes
-  const getQrs = async () => {
-    const response = await fetch("http://localhost:3000/qrs")
+  const getQrcs = async () => {
+    const response = await fetch("http://localhost:3000/qrcs")
     const data = await response.json()
-    setQrs(data.reverse());
+    setQrcs(data);
   }
 
   //this is going to run the getQrs function when components loads
   React.useEffect(() => {
-    getQrs()
+    getQrcs()
   }, [])
 
   const loaded = () => (
     <>
-    {qrs.map((qr) => {
+    {qrcs.map((qrc) => {
       return (
-        <div>
+        <div id='discounts'>
+          <h4>Discount: {qrc.discount}</h4>
+          <h5>Code: {qrc.num}</h5>
           
-          <h5>Store: {qr.store}</h5>
-          <h6>Code: {qr.code}</h6>
-          
-
           <button onClick={async () => {
               //Make delete request
-              await fetch("http://localhost:3000/qrs/" + qr.id, {
+              await fetch("http://localhost:3000/qrcs/" + qrc.id, {
                 method: "delete"
               })
               //get updated list of Qr codes
-              getQrs()
+              getQrcs()
             }}>Delete</button>
         </div>
       );
@@ -67,7 +65,7 @@ function App() {
   const handleCreate = async (event) => {
     event.preventDefault() //prevent page refresh
     //making the post request to create a new QR codes
-    await fetch("http://localhost:3000/qrs", {
+    await fetch("http://localhost:3000/qrcs", {
       method: "post",
       headers: {
         "Content-Type":"application/json"
@@ -75,26 +73,29 @@ function App() {
       body: JSON.stringify(createForm)
     })
     //fetching an updated list of QR codes
-    getQrs()
+    getQrcs()
     //resets the form
     setCreateForm({
-      store: "",
-      qr: ""
+      num: "",
+      discount: ""
     })
   }
 
   return (
     <div className="App">          
     <AmplifySignOut />
+
     <h3>New QR Code</h3>
     <div id='qrwindow'><QrScan /></div>
+
     <form onSubmit={handleCreate}>
-      <input type="text" name="store" value={createForm.store} onChange={createChange} />
-      <input type="text" name="code" value={createForm.code} onChange={createChange} />
-      <input type="submit" value="Create QR" />
+      <input id='scaninput' type="text" name="num" placeholder="QR Scan or Manual entry" value={createForm.num} onChange={createChange} />
+      <input id='discount' type="text" name="discount" placeholder="Offer" value={createForm.discount} onChange={createChange} />
+      <input type="submit" value="Create QR" id="createbutton" />
     </form>
+
     <h3>Your QR Codes</h3>
-    {qrs.length > 0 ? loaded(): <h5>There are no QR codes</h5>}
+    {qrcs.length > 0 ? loaded(): <h5>There are no QR codes</h5>}
     </div>
   );
 }
